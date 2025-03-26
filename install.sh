@@ -25,10 +25,14 @@ sfoundryup
 # Clone Seismic Devnet repository
 echo "Cloning Seismic Devnet repository..."
 git clone --recurse-submodules https://github.com/SeismicSystems/try-devnet.git
-cd try-devnet/packages/contract/
+cd try-devnet
+
+echo "Updating submodules..."
+git submodule update --init --recursive
 
 # Deploy contract
 echo "Deploying contract..."
+cd packages/contract/
 bash script/deploy.sh
 
 # Install Bun
@@ -37,9 +41,20 @@ curl -fsSL https://bun.sh/install | bash
 source ~/.bashrc
 
 # Install Node dependencies
-echo "Installing Node dependencies..."
-cd ../cli/
-bun install
+echo "Checking CLI directory..."
+if [ -d "../cli/" ]; then
+  cd ../cli/
+  if [ -f "package.json" ]; then
+    echo "Installing Node dependencies..."
+    bun install
+  else
+    echo "Error: package.json not found in cli directory!"
+    exit 1
+  fi
+else
+  echo "Error: cli directory not found!"
+  exit 1
+fi
 
 # Execute transactions
 echo "Executing transactions..."
